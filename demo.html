@@ -1,0 +1,49 @@
+<canvas id="viewer" width="500" height="300"></canvas>
+<button id="close-button">Stop Server</button>
+<script src="/dependencies.js"></script>
+<script>
+  // We're adding a listened to the close button to stop the express server
+  const closeServerButton = document.getElementById("close-button");
+  closeServerButton.addEventListener("click", () => {
+    fetch("/stop-server", {
+      method: "POST",
+    });
+  });
+
+  // Then we'll get the JSON that contains the structure of the model. We will
+  // later use it to get the names when we select an element
+  let modelData;
+  fetch("/model.json").then(async (response) => {
+    modelData = await response.json();
+  });
+
+  // Then we'll initialize the viewer in a canvas element
+  const canvas = document.getElementById("viewer");
+  canvas.width = window.innerWidth * 0.9;
+  canvas.height = window.innerHeight * 0.9;
+  const viewer = new Viewer("viewer");
+  viewer.start();
+  viewer.on("loaded", () => {
+    // After loading the model, we'll zoom to it so the full model is in the view
+    viewer.zoomTo();
+  });
+
+  // Load the geometry
+  viewer.load("/model.wexbim", "model");
+  let lastHighlighted = null;
+  viewer.on("pick", (args) => {
+    // Here we're reacting to the 'pick' event to perform
+    // an action in response to the user selecting an element,
+    // in this case, we're highlighting the selected element
+    if (lastHighlighted) {
+      viewer.resetState([lastHighlighted]);
+    }
+
+    lastHighlighted = args.id;
+    viewer.setState(State.HIGHLIGHTED, [args.id]);
+
+    if (modelData && modelData.namesByEntityId[args.id]) {
+      console.log("Selected " + modelData.namesByEntityId[args.id]);
+    }
+  });
+</script>

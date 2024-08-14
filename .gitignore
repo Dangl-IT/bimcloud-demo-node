@@ -128,3 +128,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+demo.js
+
+utils.js
+
+WexbimGeometryConversion_IfcDuplexHouse.wexbim
+
+StructureConversion_IfcDuplexHouse.json

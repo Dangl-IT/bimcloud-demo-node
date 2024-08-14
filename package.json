@@ -1,0 +1,17 @@
+{
+  "name": "bimcloud-demo-node",
+  "version": "1.0.0",
+  "scripts": {
+    "launch": "tsc && node demo.js"
+  },
+  "author": "Dangl IT GmbH",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.2.0",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "@xbim/viewer": "2.1.0-pre202408051111"
+  }
+}
