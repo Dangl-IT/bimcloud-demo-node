@@ -5,7 +5,7 @@
 <div style='display: flex;flex-direction: column; width: 30%;'>
   <label for="ifcSelect"><strong>Select IFC Type...</strong></label>
   <select id="ifcSelect">
-    <option value="null">Show all</option>
+    <option value="false">Show all</option>
   </select>
 </div>
 
@@ -82,13 +82,23 @@
   // Event listener for select change
   document.getElementById('ifcSelect').addEventListener('change', function() {
       const selectedIfcType = this.value;
-      if (selectedIfcType) {
+      if (selectedIfcType && selectedIfcType !== 'false') {
           const selectedValues = entityIdsByIfcType[selectedIfcType];
           viewer.resetState([...listOfElementsId]);
           viewer.setState(State.HIDDEN, listOfElementsId?.filter((e) => !!selectedValues && !selectedValues?.includes(e)) || []);
+          if (checkIfSelectedElementIsHidden(lastHighlighted, selectedValues)) {
+            viewer.setState(State.HIGHLIGHTED, [lastHighlighted]);
+          }
       } else {
         viewer.resetState();
+        viewer?.setState(State.HIGHLIGHTED, [lastHighlighted]);
       }
+     
   });
+
+  function checkIfSelectedElementIsHidden(selectedId, elementIds) {
+    return selectedId ? !!elementIds?.includes(selectedId) : false;
+  }
+  
 
 </script>
