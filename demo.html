@@ -1,5 +1,14 @@
-<canvas id="viewer" width="500" height="300"></canvas>
-<button id="close-button">Stop Server</button>
+<div>
+  <canvas id="viewer" width="500" height="300"></canvas>
+  <button id="close-button">Stop Server</button>
+</div>
+<div style='display: flex;flex-direction: column; width: 30%;'>
+  <label for="ifcSelect"><strong>Select IFC Type...</strong></label>
+  <select id="ifcSelect">
+    <option value="null">Show all</option>
+  </select>
+</div>
+
 <script src="/dependencies.js"></script>
 <script>
   // We're adding a listened to the close button to stop the express server
@@ -13,37 +22,73 @@
   // Then we'll get the JSON that contains the structure of the model. We will
   // later use it to get the names when we select an element
   let modelData;
+  let entityIdsByIfcType;
+  let listOfElementsId;
   fetch("/model.json").then(async (response) => {
     modelData = await response.json();
+    entityIdsByIfcType = modelData.entityIdsByIfcType;
+    
+    // Populate the select dropdown on page load
+    populateSelect(); 
   });
-
+ 
   // Then we'll initialize the viewer in a canvas element
   const canvas = document.getElementById("viewer");
   canvas.width = window.innerWidth * 0.9;
-  canvas.height = window.innerHeight * 0.9;
+  canvas.height = window.innerHeight * 0.83;
   const viewer = new Viewer("viewer");
   viewer.start();
-  viewer.on("loaded", () => {
+  viewer.on("loaded", (loaded) => {
     // After loading the model, we'll zoom to it so the full model is in the view
     viewer.zoomTo();
+    const loadModelId = loaded.model;
+    listOfElementsId = viewer?.getModelState(loadModelId).map((v) => v[0]);
   });
 
   // Load the geometry
   viewer.load("/model.wexbim", "model");
   let lastHighlighted = null;
+  const h2Element = document.createElement('h2');
+  document.body.appendChild(h2Element);
   viewer.on("pick", (args) => {
     // Here we're reacting to the 'pick' event to perform
     // an action in response to the user selecting an element,
     // in this case, we're highlighting the selected element
     if (lastHighlighted) {
-      viewer.resetState([lastHighlighted]);
+      const elementState = viewer.getState(lastHighlighted) === State.HIDDEN ? State.HIDDEN : State.UNSTYLED;
+      viewer?.setState(elementState, [lastHighlighted]);
     }
-
     lastHighlighted = args.id;
     viewer.setState(State.HIGHLIGHTED, [args.id]);
 
-    if (modelData && modelData.namesByEntityId[args.id]) {
-      console.log("Selected " + modelData.namesByEntityId[args.id]);
+    if (modelData && modelData.namesByEntityId[args.id]) {      
+      h2Element.textContent = modelData.namesByEntityId[args.id];
     }
+    
   });
+
+
+  function populateSelect() {
+    const selectElement = document.getElementById('ifcSelect');
+    // Populate select options with IFC types
+    for (const ifcType in entityIdsByIfcType) {
+        const option = document.createElement('option');
+        option.value = ifcType;
+        option.textContent = ifcType;
+        selectElement.appendChild(option);
+    } 
+  };
+  
+  // Event listener for select change
+  document.getElementById('ifcSelect').addEventListener('change', function() {
+      const selectedIfcType = this.value;
+      if (selectedIfcType) {
+          const selectedValues = entityIdsByIfcType[selectedIfcType];
+          viewer.resetState([...listOfElementsId]);
+          viewer.setState(State.HIDDEN, listOfElementsId?.filter((e) => !!selectedValues && !selectedValues?.includes(e)) || []);
+      } else {
+        viewer.resetState();
+      }
+  });
+
 </script>
