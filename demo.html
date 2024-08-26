@@ -50,6 +50,8 @@
   let lastHighlighted = null;
   const h2Element = document.createElement('h2');
   document.body.appendChild(h2Element);
+  const h3Element = document.createElement('h3');
+  document.body.appendChild(h3Element);
   viewer.on("pick", (args) => {
     // Here we're reacting to the 'pick' event to perform
     // an action in response to the user selecting an element,
@@ -63,8 +65,10 @@
 
     if (modelData && modelData.namesByEntityId[args.id]) {      
       h2Element.textContent = `Selected Element: ${modelData.namesByEntityId[args.id]}`;
+      h3Element.textContent = `IFC Guid: ${modelData.ifcGuidsByEntityId[args.id]}`;
     } else {
       h2Element.textContent = '';
+      h3Element.textContent = '';
     }
     
   });
