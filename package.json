@@ -11,7 +11,7 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "express": "^4.21.0",
     "@xbim/viewer": "2.1.0-pre202408051111"
   }
 }
